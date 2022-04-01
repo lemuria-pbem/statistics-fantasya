@@ -1,0 +1,5 @@
+/vendor
+
+/.idea/deployment.xml
+/.idea/workspace.xml
+/composer.lock
