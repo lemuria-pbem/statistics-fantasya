@@ -2,9 +2,7 @@
 declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya\Compilation;
 
-use Lemuria\Statistics\Compilation;
-
-final class NotAvailable implements Compilation
+final class NotAvailable extends Data
 {
 	private static ?NotAvailable $instance = null;
 

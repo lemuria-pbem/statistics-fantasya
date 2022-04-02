@@ -2,17 +2,24 @@
 declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya;
 
+use Lemuria\Exception\LemuriaException;
 use Lemuria\Lemuria;
 use Lemuria\Statistics;
 use Lemuria\Statistics\Compilation;
+use Lemuria\Statistics\Fantasya\Compilation\Data;
 use Lemuria\Statistics\Fantasya\Compilation\NotAvailable;
+use Lemuria\Statistics\Fantasya\Compilation\Number;
 use Lemuria\Statistics\Fantasya\Exception\AlreadyRegisteredException;
+use Lemuria\Statistics\Fantasya\Officer\AbstractOfficer;
+use Lemuria\Statistics\Fantasya\Officer\CensusWorker;
 use Lemuria\Statistics\Metrics;
 use Lemuria\Statistics\Officer;
 use Lemuria\Statistics\Record;
 
 class LemuriaStatistics implements Statistics
 {
+	protected final const OFFICERS = [CensusWorker::class];
+
 	protected final const FILE = 'statistics.json';
 
 	protected int $round;
@@ -29,10 +36,14 @@ class LemuriaStatistics implements Statistics
 	protected array $collection = [];
 
 	public function __construct(private Archivist $archivist) {
+		AbstractOfficer::setStatistics($this);
 		$this->round   = Lemuria::Calendar()->Round();
 		$this->next    = $this->round + 1;
 		$provider      = $archivist->createProvider($this->round);
 		$this->archive = $provider->exists(self::FILE) ? $provider->read(self::FILE) : [];
+		foreach (self::OFFICERS as $officer) {
+			$this->register(new $officer());
+		}
 	}
 
 	public function __destruct() {
@@ -47,13 +58,11 @@ class LemuriaStatistics implements Statistics
 
 	public function request(Record $record): Compilation {
 		$round = $record->Round();
-		$id    = $record->Identifiable();
-		$key   = $id->Catalog()->value . '.' . $id->Id()->Id() . '.' . $record->Subject();
 		if ($round === $this->round) {
-			return $this->archive[$key] ?? NotAvailable::getInstance();
+			return $this->createCollection($this->archive[$this->key($record)] ?? null);
 		}
 		if ($round === $this->next) {
-			return $this->collection[$key] ?? NotAvailable::getInstance();
+			return $this->createCollection($this->collection[$this->key($record)] ?? null);
 		}
 		return NotAvailable::getInstance();
 	}
@@ -90,5 +99,32 @@ class LemuriaStatistics implements Statistics
 			}
 		}
 		return $this;
+	}
+
+	public function store(Record $record, Data $compilation): void {
+		$round = $record->Round();
+		if ($round === $this->next) {
+			$this->collection[$this->key($record)] = $compilation->serialize();
+		}
+	}
+
+	protected function createCollection(mixed $data): Compilation {
+		if ($data === null) {
+			return NotAvailable::getInstance();
+		}
+		if (is_array($data)) {
+			$number         = new Number($data[0]);
+			$number->change = $data[1];
+			return $number;
+		}
+		if (is_numeric($data)) {
+			return new Number($data);
+		}
+		throw new LemuriaException('Unknown compilation data format.');
+	}
+
+	private function key(Record $record): string {
+		$id = $record->Identifiable();
+		return $id->Catalog()->value . '.' . $id->Id()->Id() . '.' . $record->Subject();
 	}
 }
