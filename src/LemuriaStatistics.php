@@ -15,6 +15,8 @@ use Lemuria\Statistics\Fantasya\Officer\CensusWorker;
 use Lemuria\Statistics\Metrics;
 use Lemuria\Statistics\Officer;
 use Lemuria\Statistics\Record;
+use Lemuria\Version\VersionFinder;
+use Lemuria\Version\VersionTag;
 
 class LemuriaStatistics implements Statistics
 {
@@ -99,6 +101,11 @@ class LemuriaStatistics implements Statistics
 			}
 		}
 		return $this;
+	}
+
+	public function getVersion(): VersionTag {
+		$versionFinder = new VersionFinder(__DIR__ . '/..');
+		return $versionFinder->get();
 	}
 
 	public function store(Record $record, Data $compilation): void {
