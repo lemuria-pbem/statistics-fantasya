@@ -39,10 +39,6 @@ class LemuriaStatistics implements Statistics
 
 	public function __construct(private Archivist $archivist) {
 		AbstractOfficer::setStatistics($this);
-		$this->round   = Lemuria::Calendar()->Round();
-		$this->next    = $this->round + 1;
-		$provider      = $archivist->createProvider($this->round);
-		$this->archive = $provider->exists(self::FILE) ? $provider->read(self::FILE) : [];
 		foreach (self::OFFICERS as $officer) {
 			$this->register(new $officer());
 		}
@@ -54,6 +50,16 @@ class LemuriaStatistics implements Statistics
 				$officer->close();
 			}
 		}
+	}
+
+	public function load(): void {
+		$this->round   = Lemuria::Calendar()->Round();
+		$this->next    = $this->round + 1;
+		$provider      = $this->archivist->createProvider($this->round);
+		$this->archive = $provider->exists(self::FILE) ? $provider->read(self::FILE) : [];
+	}
+
+	public function save(): void {
 		$provider = $this->archivist->createProvider($this->round + 1);
 		$provider->write(self::FILE, $this->collection);
 	}
