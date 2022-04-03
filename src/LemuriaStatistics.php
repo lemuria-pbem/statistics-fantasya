@@ -78,14 +78,14 @@ class LemuriaStatistics implements Statistics
 	public function register(Officer $officer): Statistics {
 		$id = $officer->Id();
 		foreach ($officer->Subjects() as $subject) {
-			$class = (string)$subject;
-			if (!isset($this->officers[$class])) {
-				$this->officers[$class] = [];
+			$key = (string)$subject;
+			if (!isset($this->officers[$key])) {
+				$this->officers[$key] = [];
 			}
-			if (isset($this->officers[$class][$id])) {
+			if (isset($this->officers[$key][$id])) {
 				throw new AlreadyRegisteredException($officer);
 			}
-			$this->officers[$class][$id] = $officer;
+			$this->officers[$key][$id] = $officer;
 		}
 		return $this;
 	}
@@ -93,8 +93,8 @@ class LemuriaStatistics implements Statistics
 	public function resign(Officer $officer): Statistics {
 		$id = $officer->Id();
 		foreach ($officer->Subjects() as $subject) {
-			$class = (string)$subject;
-			unset ($this->officers[$class][$id]);
+			$key = (string)$subject;
+			unset ($this->officers[$key][$id]);
 		}
 		return $this;
 	}

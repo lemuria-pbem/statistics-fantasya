@@ -9,16 +9,13 @@ use Lemuria\Statistics\Subject;
 
 class Base implements Subject
 {
-	private string $class;
+	private string $key;
 
 	#[Pure] public function __construct(?Category $category = null) {
-		$this->class = getClass($this);
-		if ($category) {
-			$this->class .= '.' . $category->name;
-		}
+		$this->key = $category ? $category->name : getClass($this);
 	}
 
 	public function __toString(): string {
-		return $this->class;
+		return $this->key;
 	}
 }

@@ -5,4 +5,6 @@ namespace Lemuria\Statistics\Fantasya\Subject;
 enum Category
 {
 	case Population;
+
+	case Unemployment;
 }

@@ -6,10 +6,10 @@ use Lemuria\Exception\LemuriaException;
 use Lemuria\Lemuria;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Statistics\Fantasya\Compilation\Data;
+use Lemuria\Statistics\Fantasya\Compilation\Number;
 use Lemuria\Statistics\Fantasya\Current;
 use Lemuria\Statistics\Fantasya\Last;
 use Lemuria\Statistics\Fantasya\LemuriaStatistics;
-use Lemuria\Statistics\Fantasya\Metrics\Entity;
 use Lemuria\Statistics\Metrics;
 use Lemuria\Statistics\Officer;
 
@@ -43,30 +43,30 @@ abstract class AbstractOfficer implements Officer
 		Lemuria::Statistics()->resign($this);
 	}
 
-	protected function request(Entity $metrics): Data {
+	protected function storeNumber(Metrics $message, int|float $value): void {
+		$archive             = $this->request($message);
+		$compilation         = new Number($value);
+		$compilation->change = $value - $archive->value;
+		$this->store($message, $compilation);
+	}
+
+	protected function request(Metrics $metrics): Data {
 		$record = new Last($metrics->Identifiable(), $metrics->Subject());
 		/** @var Data $data */
 		$data = self::$statistics->request($record);
 		return $data;
 	}
 
-	protected function store(Entity $metrics, Data $compilation): void {
+	protected function store(Metrics $metrics, Data $compilation): void {
 		$record = new Current($metrics->Identifiable(), $metrics->Subject());
 		self::$statistics->store($record, $compilation);
 	}
 
-	protected function entity(Metrics $metrics): Entity {
-		if ($metrics instanceof Entity) {
-			return $metrics;
-		}
-		throw new LemuriaException('Metrics is not an entity.');
-	}
-
-	protected function region(Entity $metrics): Region {
+	protected function region(Metrics $metrics): Region {
 		$region = $metrics->Identifiable();
 		if ($region instanceof Region) {
 			return $region;
 		}
-		throw new LemuriaException('Metrics has no region entity.');
+		throw new LemuriaException('Expected a Region identifiable in metrics ' . $metrics->Subject() . '.');
 	}
 }
