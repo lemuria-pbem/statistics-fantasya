@@ -16,7 +16,6 @@
 	"require": {
 		"php": "~8.1",
 		"lemuria-pbem/lemuria": "dev-feature/statistics",
-		"lemuria-pbem/engine-fantasya": "dev-feature/statistics",
 		"lemuria-pbem/model-fantasya": "dev-feature/statistics"
 	},
 	"require-dev": {
@@ -26,10 +25,6 @@
 		{
 			"type": "vcs",
 			"url": "git@github.com:lemuria-pbem/lemuria.git"
-		},
-		{
-			"type": "vcs",
-			"url": "git@github.com:lemuria-pbem/engine-fantasya.git"
 		},
 		{
 			"type": "vcs",

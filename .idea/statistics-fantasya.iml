@@ -12,8 +12,6 @@
       <excludeFolder url="file://$MODULE_DIR$/vendor/symfony/polyfill-php81" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/lemuria-pbem/lemuria" />
       <excludeFolder url="file://$MODULE_DIR$/vendor/lemuria-pbem/model-fantasya" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/lemuria-pbem/engine-fantasya" />
-      <excludeFolder url="file://$MODULE_DIR$/vendor/monolog/monolog" />
     </content>
     <orderEntry type="inheritedJdk" />
     <orderEntry type="sourceFolder" forTests="false" />

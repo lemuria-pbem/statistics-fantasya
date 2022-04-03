@@ -24,9 +24,10 @@ class CensusWorker extends AbstractOfficer
 	}
 
 	public function process(Metrics $message): void {
-		$region = $this->region($message);
+		$region    = $this->region($message);
+		$resources = $region->Resources();
 
-		$peasants = $region->Resources()[$this->peasant]->Count();
+		$peasants = $resources[$this->peasant]->Count();
 		$this->storeNumber($message, $peasants);
 
 		$message      = new Entity($region, new Base(Category::Unemployment));
