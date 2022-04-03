@@ -2,9 +2,30 @@
 declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya;
 
-class Current extends Last
+use Lemuria\Identifiable;
+use Lemuria\Lemuria;
+use Lemuria\Statistics\Record;
+use Lemuria\Statistics\Subject;
+
+class Current implements Record
 {
-	protected static function initRound(int $round): void {
-		parent::initRound($round + 1);
+	private static ?int $round = null;
+
+	public function __construct(private Identifiable $identifiable, private Subject $subject) {
+	}
+
+	public function Subject(): Subject {
+		return $this->subject;
+	}
+
+	public function Identifiable(): Identifiable {
+		return $this->identifiable;
+	}
+
+	public function Round(): int {
+		if (self::$round === null) {
+			self::$round = Lemuria::Calendar()->Round();
+		}
+		return self::$round;
 	}
 }
