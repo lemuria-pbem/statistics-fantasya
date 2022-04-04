@@ -2,15 +2,10 @@
 declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya;
 
-use Lemuria\Exception\LemuriaException;
 use Lemuria\Lemuria;
 use Lemuria\Statistics;
-use Lemuria\Statistics\Compilation;
-use Lemuria\Statistics\Fantasya\Compilation\Data;
-use Lemuria\Statistics\Fantasya\Compilation\NotAvailable;
-use Lemuria\Statistics\Fantasya\Compilation\Number;
+use Lemuria\Statistics\Data\Number;
 use Lemuria\Statistics\Fantasya\Exception\AlreadyRegisteredException;
-use Lemuria\Statistics\Fantasya\Officer\AbstractOfficer;
 use Lemuria\Statistics\Fantasya\Officer\CensusWorker;
 use Lemuria\Statistics\Metrics;
 use Lemuria\Statistics\Officer;
@@ -22,12 +17,6 @@ class LemuriaStatistics implements Statistics
 {
 	protected final const OFFICERS = [CensusWorker::class];
 
-	protected final const FILE = 'statistics.json';
-
-	protected int $round;
-
-	protected int $next;
-
 	/**
 	 * @var array(string=>array)
 	 */
@@ -37,8 +26,7 @@ class LemuriaStatistics implements Statistics
 
 	protected array $collection = [];
 
-	public function __construct(private Archivist $archivist) {
-		AbstractOfficer::setStatistics($this);
+	public function __construct() {
 		foreach (self::OFFICERS as $officer) {
 			$this->register(new $officer());
 		}
@@ -53,39 +41,37 @@ class LemuriaStatistics implements Statistics
 	}
 
 	public function load(): void {
-		$this->round   = Lemuria::Calendar()->Round();
-		$this->next    = $this->round + 1;
-		$provider      = $this->archivist->createProvider($this->round);
-		$this->archive = $provider->exists(self::FILE) ? $provider->read(self::FILE) : [];
+		$this->archive = Lemuria::Game()->getStatistics();
 	}
 
 	public function save(): void {
-		$provider = $this->archivist->createProvider($this->round + 1);
-		$provider->write(self::FILE, $this->collection);
+		Lemuria::Game()->setStatistics($this->collection);
 	}
 
-	public function request(Record $record): Compilation {
-		$round = $record->Round();
-		if ($round === $this->round) {
-			return $this->createCollection($this->archive[$this->key($record)] ?? null);
+	public function request(Record $record): Record {
+		$key = $record->Key();
+		if (isset($this->archive[$key])) {
+			$data = new Number();
+			return $record->setData($data->unserialize($this->archive[$key]));
 		}
-		if ($round === $this->next) {
-			return $this->createCollection($this->collection[$this->key($record)] ?? null);
-		}
-		return NotAvailable::getInstance();
+		return $record->setData(null);
+	}
+
+	public function store(Record $record): Statistics {
+		$this->collection[$record->Key()] = $record->Data()->serialize();
+		return $this;
 	}
 
 	public function register(Officer $officer): Statistics {
 		$id = $officer->Id();
 		foreach ($officer->Subjects() as $subject) {
-			$key = (string)$subject;
-			if (!isset($this->officers[$key])) {
-				$this->officers[$key] = [];
+			if (!isset($this->officers[$subject])) {
+				$this->officers[$subject] = [];
 			}
-			if (isset($this->officers[$key][$id])) {
+			if (isset($this->officers[$subject][$id])) {
 				throw new AlreadyRegisteredException($officer);
 			}
-			$this->officers[$key][$id] = $officer;
+			$this->officers[$subject][$id] = $officer;
 		}
 		return $this;
 	}
@@ -93,14 +79,13 @@ class LemuriaStatistics implements Statistics
 	public function resign(Officer $officer): Statistics {
 		$id = $officer->Id();
 		foreach ($officer->Subjects() as $subject) {
-			$key = (string)$subject;
-			unset ($this->officers[$key][$id]);
+			unset ($this->officers[$subject][$id]);
 		}
 		return $this;
 	}
 
 	public function enqueue(Metrics $message): Statistics {
-		$subject = (string)$message->Subject();
+		$subject = $message->Subject();
 		if (isset($this->officers[$subject])) {
 			foreach ($this->officers[$subject] as $officer /* @var Officer $officer */) {
 				$officer->process($message);
@@ -112,32 +97,5 @@ class LemuriaStatistics implements Statistics
 	public function getVersion(): VersionTag {
 		$versionFinder = new VersionFinder(__DIR__ . '/..');
 		return $versionFinder->get();
-	}
-
-	public function store(Record $record, Data $compilation): void {
-		$round = $record->Round();
-		if ($round === $this->next) {
-			$this->collection[$this->key($record)] = $compilation->serialize();
-		}
-	}
-
-	protected function createCollection(mixed $data): Compilation {
-		if ($data === null) {
-			return NotAvailable::getInstance();
-		}
-		if (is_array($data)) {
-			$number         = new Number($data[0]);
-			$number->change = $data[1];
-			return $number;
-		}
-		if (is_numeric($data)) {
-			return new Number($data);
-		}
-		throw new LemuriaException('Unknown compilation data format.');
-	}
-
-	private function key(Record $record): string {
-		$id = $record->Identifiable();
-		return $id->Catalog()->value . '.' . $id->Id()->Id() . '.' . $record->Subject();
 	}
 }
