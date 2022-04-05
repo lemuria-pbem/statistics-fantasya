@@ -7,6 +7,7 @@ use Lemuria\Statistics;
 use Lemuria\Statistics\Data\Number;
 use Lemuria\Statistics\Fantasya\Exception\AlreadyRegisteredException;
 use Lemuria\Statistics\Fantasya\Officer\CensusWorker;
+use Lemuria\Statistics\Fantasya\Officer\Ranger;
 use Lemuria\Statistics\Metrics;
 use Lemuria\Statistics\Officer;
 use Lemuria\Statistics\Record;
@@ -15,7 +16,7 @@ use Lemuria\Version\VersionTag;
 
 class LemuriaStatistics implements Statistics
 {
-	protected final const OFFICERS = [CensusWorker::class];
+	protected final const OFFICERS = [CensusWorker::class, Ranger::class];
 
 	/**
 	 * @var array(string=>array)
