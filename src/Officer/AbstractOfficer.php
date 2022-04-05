@@ -63,7 +63,7 @@ abstract class AbstractOfficer implements Officer
 		foreach ($commodities as $class => $amount) {
 			if (isset($data[$class])) {
 				$newData[$class] = new Number($amount, $amount - $data[$class]->value);
-				unset($newData[$class]);
+				unset($data[$class]);
 			} else {
 				$newData[$class] = new Number($amount, $amount);
 			}
@@ -71,6 +71,8 @@ abstract class AbstractOfficer implements Officer
 		foreach ($data as $class => $number) {
 			$newData[$class] = new Number(0, -$number->value);
 		}
-		$statistics->store($archive->setData($data));
+		if (count($newData) > 0) {
+			$statistics->store($archive->setData($newData));
+		}
 	}
 }

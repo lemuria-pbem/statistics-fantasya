@@ -17,26 +17,32 @@ class Ranger extends AbstractOfficer
 {
 	use BuilderTrait;
 
+	protected final const ANIMALS = [Camel::class, Elephant::class, Griffin::class, Horse::class, Pegasus::class];
+
 	public function __construct() {
 		parent::__construct();
 		$this->subjects[] = Subject::Animals->name;
-		$this->subjects[] = Subject::Trees;
+		$this->subjects[] = Subject::Trees->name;
 	}
 
 	public function process(Metrics $message): void {
-		$classes = match ($message->Subject()) {
-			Subject::Animals->name => [Camel::class, Elephant::class, Griffin::class, Horse::class, Pegasus::class],
-			Subject::Trees->name => [Wood::class],
-			default => throw new UnsupportedSubjectException($this, $message),
-		};
 		$resources = $this->region($message)->Resources();
-		$amounts   = [];
-		foreach ($classes as $class) {
-			$count = $resources[$class]->Count();
-			if ($count > 0) {
-				$amounts[$class] = $count;
-			}
+		switch ($message->Subject()) {
+			case Subject::Animals->name :
+				$amounts = [];
+				foreach (self::ANIMALS as $class) {
+					$count = $resources[$class]->Count();
+					if ($count > 0) {
+						$amounts[$class] = $count;
+					}
+				}
+				$this->storeCommodities($message, $amounts);
+				break;
+			case Subject::Trees->name :
+				$this->storeNumber($message, $resources[Wood::class]->Count());
+				break;
+			default :
+				throw new UnsupportedSubjectException($this, $message);
 		}
-		$this->storeCommodities($message, $amounts);
 	}
 }
