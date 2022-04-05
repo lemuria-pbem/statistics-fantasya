@@ -45,7 +45,8 @@ abstract class AbstractOfficer implements Officer
 	protected function storeNumber(Metrics $message, int|float $value): void {
 		$statistics = Lemuria::Statistics();
 		$archive    = $statistics->request(Record::from($message));
-		$change     = $archive instanceof Number ? $value - $archive->value : null;
+		$data       = $archive->Data();
+		$change     = $data instanceof Number ? $value - $data->value : $value;
 		$data       = new Number($value, $change);
 		$statistics->store($archive->setData($data));
 	}

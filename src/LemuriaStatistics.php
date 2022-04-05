@@ -49,7 +49,7 @@ class LemuriaStatistics implements Statistics
 	}
 
 	public function request(Record $record): Record {
-		$key = $record->Key();
+		$key = $this->key($record);
 		if (isset($this->archive[$key])) {
 			$data = new Number();
 			return $record->setData($data->unserialize($this->archive[$key]));
@@ -58,7 +58,8 @@ class LemuriaStatistics implements Statistics
 	}
 
 	public function store(Record $record): Statistics {
-		$this->collection[$record->Key()] = $record->Data()->serialize();
+		$key                    = $this->key($record);
+		$this->collection[$key] = $record->Data()->serialize();
 		return $this;
 	}
 
@@ -97,5 +98,13 @@ class LemuriaStatistics implements Statistics
 	public function getVersion(): VersionTag {
 		$versionFinder = new VersionFinder(__DIR__ . '/..');
 		return $versionFinder->get();
+	}
+
+	protected function key(Record $record): string {
+		$entity = $record->Entity();
+		if ($entity) {
+			return $entity->Catalog()->value . '.' . $entity->Id()->Id() . '.' . $record->Key();
+		}
+		return $record->Key();
 	}
 }
