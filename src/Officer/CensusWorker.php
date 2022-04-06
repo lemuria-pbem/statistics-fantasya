@@ -19,8 +19,10 @@ class CensusWorker extends AbstractOfficer
 		parent::__construct();
 		$this->subjects[] = Subject::Births->name;
 		$this->subjects[] = Subject::Migration->name;
+		$this->subjects[] = Subject::People->name;
 		$this->subjects[] = Subject::Population->name;
 		$this->subjects[] = Subject::Unemployment->name;
+		$this->subjects[] = Subject::Units->name;
 		$this->subjects[] = Subject::Wealth->name;
 	}
 
@@ -35,6 +37,9 @@ class CensusWorker extends AbstractOfficer
 				$amount = $data instanceof Number ? $data->value : 0;
 				$this->storeCachedNumber($message, $amount);
 				return;
+			case Subject::People->name :
+				$amount = $this->party($message)->People()->Size();
+				break;
 			case Subject::Population->name :
 				$resources = $this->region($message)->Resources();
 				$amount    = $resources[Peasant::class]->Count();
@@ -42,6 +47,9 @@ class CensusWorker extends AbstractOfficer
 			case Subject::Unemployment->name :
 				$availability = new Availability($this->region($message));
 				$amount       = $availability->getResource(Peasant::class)->Count();
+				break;
+			case Subject::Units->name :
+				$amount = $this->party($message)->People()->count();
 				break;
 			case Subject::Wealth->name :
 				$resources = $this->region($message)->Resources();

@@ -4,6 +4,7 @@ namespace Lemuria\Statistics\Fantasya\Officer;
 
 use Lemuria\Exception\LemuriaException;
 use Lemuria\Lemuria;
+use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Statistics\Data\Commodities;
 use Lemuria\Statistics\Data\Number;
@@ -35,6 +36,14 @@ abstract class AbstractOfficer implements Officer
 
 	public function close(): void {
 		Lemuria::Statistics()->resign($this);
+	}
+
+	protected function party(Metrics $metrics): Party {
+		$party = $metrics->Entity();
+		if ($party instanceof Party) {
+			return $party;
+		}
+		throw new LemuriaException('Expected a Party identifiable in metrics ' . $metrics->Subject() . '.');
 	}
 
 	protected function region(Metrics $metrics): Region {
