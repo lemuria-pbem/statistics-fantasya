@@ -7,6 +7,7 @@ use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Model\Fantasya\Commodity\Peasant;
 use Lemuria\Model\Fantasya\Commodity\Silver;
 use Lemuria\Model\Fantasya\Factory\BuilderTrait;
+use Lemuria\Statistics\Data\Number;
 use Lemuria\Statistics\Fantasya\Exception\UnsupportedSubjectException;
 use Lemuria\Statistics\Metrics;
 
@@ -16,6 +17,8 @@ class CensusWorker extends AbstractOfficer
 
 	public function __construct() {
 		parent::__construct();
+		$this->subjects[] = Subject::Births->name;
+		$this->subjects[] = Subject::Migration->name;
 		$this->subjects[] = Subject::Population->name;
 		$this->subjects[] = Subject::Unemployment->name;
 		$this->subjects[] = Subject::Wealth->name;
@@ -23,6 +26,15 @@ class CensusWorker extends AbstractOfficer
 
 	public function process(Metrics $message): void {
 		switch ($message->Subject()) {
+			case Subject::Births->name :
+				$data   = $message->Data();
+				$amount = $data instanceof Number ? $data->value : 0;
+				break;
+			case Subject::Migration->name :
+				$data   = $message->Data();
+				$amount = $data instanceof Number ? $data->value : 0;
+				$this->storeCachedNumber($message, $amount);
+				return;
 			case Subject::Population->name :
 				$resources = $this->region($message)->Resources();
 				$amount    = $resources[Peasant::class]->Count();

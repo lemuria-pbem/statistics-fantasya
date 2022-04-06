@@ -15,6 +15,8 @@ abstract class AbstractOfficer implements Officer
 {
 	protected array $subjects = [];
 
+	protected array $cache = [];
+
 	private static int $lastId = 0;
 
 	private int $id;
@@ -50,6 +52,19 @@ abstract class AbstractOfficer implements Officer
 		$change     = $data instanceof Number ? $value - $data->value : $value;
 		$data       = new Number($value, $change);
 		$statistics->store($archive->setData($data));
+	}
+
+	protected function storeCachedNumber(Metrics $metrics, int|float $value): void {
+		$entity = $metrics->Entity();
+		if ($entity) {
+			$key = $entity->Catalog()->value . '.' . $entity->Id()->Id() . '.' . $metrics->Subject();
+		} else {
+			$key = $metrics->Subject();
+		}
+		$cachedValue       = $this->cache[$key] ?? 0;
+		$cachedValue      += $value;
+		$this->cache[$key] = $cachedValue;
+		$this->storeNumber($metrics, $cachedValue);
 	}
 
 	protected function storeCommodities(Metrics $message, array $commodities): void {
