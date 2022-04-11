@@ -49,6 +49,9 @@ class LemuriaStatistics implements Statistics
 	public function save(): void {
 		ksort($this->collection);
 		Lemuria::Game()->setStatistics($this->collection);
+
+		$this->archive    = $this->collection;
+		$this->collection = [];
 	}
 
 	public function request(Record $record): Record {
