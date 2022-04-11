@@ -2,8 +2,12 @@
 declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya;
 
+use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Lemuria;
+use Lemuria\Model\Fantasya\Statistics\Data\Commodities;
+use Lemuria\Model\Fantasya\Statistics\Data\Market;
 use Lemuria\Statistics;
+use Lemuria\Statistics\Data;
 use Lemuria\Statistics\Data\Number;
 use Lemuria\Statistics\Fantasya\Exception\AlreadyRegisteredException;
 use Lemuria\Statistics\Fantasya\Officer\CensusWorker;
@@ -57,7 +61,7 @@ class LemuriaStatistics implements Statistics
 	public function request(Record $record): Record {
 		$key = $record->Key();
 		if (isset($this->archive[$key])) {
-			$data = new Number();
+			$data = $this->createData($record);
 			return $record->setData($data->unserialize($this->archive[$key]));
 		}
 		return $record->setData(null);
@@ -103,5 +107,13 @@ class LemuriaStatistics implements Statistics
 	public function getVersion(): VersionTag {
 		$versionFinder = new VersionFinder(__DIR__ . '/..');
 		return $versionFinder->get();
+	}
+
+	protected function createData(Record $record): Data {
+		return match ($record->Subject()) {
+			Subject::Animals->name => new Commodities(),
+			Subject::Market->name  => new Market(),
+			default                => new Number()
+		};
 	}
 }
