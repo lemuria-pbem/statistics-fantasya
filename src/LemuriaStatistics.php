@@ -111,9 +111,9 @@ class LemuriaStatistics implements Statistics
 
 	protected function createData(Record $record): Data {
 		return match ($record->Subject()) {
-			Subject::Animals->name => new Commodities(),
-			Subject::Market->name  => new Market(),
-			default                => new Number()
+			Subject::Animals->name, Subject::MaterialPool->name => new Commodities(),
+			Subject::Market->name                               => new Market(),
+			default                                             => new Number()
 		};
 	}
 }
