@@ -8,6 +8,7 @@ use function Lemuria\getClass;
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Lemuria;
 use Lemuria\Model\Fantasya\Factory\BuilderTrait;
+use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\Quantity;
@@ -27,6 +28,7 @@ class Economist extends AbstractOfficer
 		$this->subjects[] = Subject::Income->name;
 		$this->subjects[] = Subject::Market->name;
 		$this->subjects[] = Subject::MaterialPool->name;
+		$this->subjects[] = Subject::RegionPool->name;
 		$this->subjects[] = Subject::Workers->name;
 	}
 
@@ -50,7 +52,13 @@ class Economist extends AbstractOfficer
 			case Subject::MaterialPool->name :
 				$party = $this->party($message);
 				$pool  = $this->getMaterialPool($party);
-				$this->storeCommodities($message, $pool);
+				$this->storeSingletons($message, $pool);
+				break;
+			case Subject::RegionPool->name :
+				$unit         = $this->unit($message);
+				$intelligence = new Intelligence($unit->Region());
+				$pool         = $intelligence->getMaterialPool($unit->Party());
+				$this->storeRegionPool($message, $pool);
 				break;
 			default :
 				throw new UnsupportedSubjectException($this, $message);
