@@ -36,7 +36,7 @@ class Ranger extends AbstractOfficer
 						$amounts[$class] = $count;
 					}
 				}
-				$this->storeCommodities($message, $amounts);
+				$this->storeSingletons($message, $amounts);
 				break;
 			case Subject::Trees->name :
 				$this->storeNumber($message, $resources[Wood::class]->Count());

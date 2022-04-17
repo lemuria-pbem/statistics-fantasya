@@ -4,7 +4,7 @@ namespace Lemuria\Statistics\Fantasya;
 
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Lemuria;
-use Lemuria\Model\Fantasya\Statistics\Data\Commodities;
+use Lemuria\Model\Fantasya\Statistics\Data\Singletons;
 use Lemuria\Model\Fantasya\Statistics\Data\Market;
 use Lemuria\Statistics;
 use Lemuria\Statistics\Data;
@@ -13,6 +13,7 @@ use Lemuria\Statistics\Fantasya\Exception\AlreadyRegisteredException;
 use Lemuria\Statistics\Fantasya\Officer\CensusWorker;
 use Lemuria\Statistics\Fantasya\Officer\Economist;
 use Lemuria\Statistics\Fantasya\Officer\Ranger;
+use Lemuria\Statistics\Fantasya\Officer\SchoolInspector;
 use Lemuria\Statistics\Metrics;
 use Lemuria\Statistics\Officer;
 use Lemuria\Statistics\Record;
@@ -21,7 +22,7 @@ use Lemuria\Version\VersionTag;
 
 class LemuriaStatistics implements Statistics
 {
-	protected final const OFFICERS = [CensusWorker::class, Economist::class, Ranger::class];
+	protected final const OFFICERS = [CensusWorker::class, Economist::class, Ranger::class, SchoolInspector::class];
 
 	/**
 	 * @var array(string=>array)
@@ -111,9 +112,10 @@ class LemuriaStatistics implements Statistics
 
 	protected function createData(Record $record): Data {
 		return match ($record->Subject()) {
-			Subject::Animals->name, Subject::MaterialPool->name => new Commodities(),
-			Subject::Market->name                               => new Market(),
-			default                                             => new Number()
+			Subject::Animals->name, Subject::MaterialPool->name,
+			Subject::RegionPool->name, Subject::Talents->name    => new Singletons(),
+			Subject::Market->name                                => new Market(),
+			default                                              => new Number()
 		};
 	}
 }

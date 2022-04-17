@@ -15,6 +15,9 @@ class CensusWorker extends AbstractOfficer
 {
 	use BuilderTrait;
 
+	/**
+	 * @noinspection DuplicatedCode
+	 */
 	public function __construct() {
 		parent::__construct();
 		$this->subjects[] = Subject::Births->name;
