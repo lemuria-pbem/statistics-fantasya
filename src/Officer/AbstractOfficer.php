@@ -74,17 +74,29 @@ abstract class AbstractOfficer implements Officer
 		$statistics->store($archive->setData($data));
 	}
 
+	protected function storeNumberPartyEntity(Metrics $message, int|float $value): void {
+		$statistics = Lemuria::Statistics();
+		$archive    = $statistics->request(PartyEntityRecord::from($message));
+		$data       = $archive->Data();
+		$change     = $data instanceof Number ? $value - $data->value : $value;
+		$data       = new Number($value, $change);
+		$statistics->store($archive->setData($data));
+	}
+
 	protected function storeCachedNumber(Metrics $metrics, int|float $value): void {
-		$entity = $metrics->Entity();
-		if ($entity) {
-			$key = $entity->Catalog()->value . '.' . $entity->Id()->Id() . '.' . $metrics->Subject();
-		} else {
-			$key = $metrics->Subject();
-		}
+		$key               = Record::from($metrics)->Key();
 		$cachedValue       = $this->cache[$key] ?? 0;
 		$cachedValue      += $value;
 		$this->cache[$key] = $cachedValue;
 		$this->storeNumber($metrics, $cachedValue);
+	}
+
+	protected function storeCachedNumberPartyEntity(Metrics $metrics, int|float $value): void {
+		$key               = PartyEntityRecord::from($metrics)->Key();
+		$cachedValue       = $this->cache[$key] ?? 0;
+		$cachedValue      += $value;
+		$this->cache[$key] = $cachedValue;
+		$this->storeNumberPartyEntity($metrics, $cachedValue);
 	}
 
 	protected function storeSingletons(Metrics $message, array $singletons): void {
