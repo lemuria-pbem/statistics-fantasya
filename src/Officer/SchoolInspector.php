@@ -9,6 +9,7 @@ use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Factory\BuilderTrait;
 use Lemuria\Model\Fantasya\Knowledge;
+use Lemuria\Model\Fantasya\Modification;
 use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Statistics\Fantasya\Exception\UnsupportedSubjectException;
@@ -21,6 +22,7 @@ class SchoolInspector extends AbstractOfficer
 	public function __construct() {
 		parent::__construct();
 		$this->subjects[] = Subject::Education->name;
+		$this->subjects[] = Subject::Experts->name;
 		$this->subjects[] = Subject::Talents->name;
 	}
 
@@ -31,9 +33,14 @@ class SchoolInspector extends AbstractOfficer
 				$totalExperience = $this->getTotalExperience($party);
 				$this->storeNumber($message, $totalExperience);
 				break;
+			case Subject::Experts->name :
+				$party   = $this->party($message);
+				$experts = $this->calculateExperts($party);
+				$this->storeSingletons($message, $experts);
+				break;
 			case Subject::Talents->name :
 				$unit    = $this->unit($message);
-				$talents = $this->getTalents($unit->Knowledge());
+				$talents = $this->getTalents($unit->Knowledge(), $unit->Race()->Modifications());
 				$this->storeSingletons($message, $talents);
 				break;
 			default :
@@ -51,10 +58,37 @@ class SchoolInspector extends AbstractOfficer
 		return $totalExperience;
 	}
 
-	protected function getTalents(Knowledge $knowledge): array {
+	protected function calculateExperts(Party $party): array {
+		$experts = [];
+		foreach ($party->People() as $unit /* @var Unit $unit */) {
+			$modifications = $unit->Race()->Modifications();
+			foreach ($unit->Knowledge() as $ability /* @var Ability $ability */) {
+				$talent       = $ability->Talent();
+				$class        = getClass($ability->getObject());
+				$modification = $modifications[$talent];
+				if ($modification instanceof Modification) {
+					$ability = $modification->getModified($ability);
+				}
+				$level = $ability->Level();
+				if (isset($experts[$class])) {
+					$experts[$class] = max($experts[$class], $level);
+				} else {
+					$experts[$class] = $level;
+				}
+			}
+		}
+		return $experts;
+	}
+
+	protected function getTalents(Knowledge $knowledge, Knowledge $modifications): array {
 		$talents = [];
 		foreach ($knowledge as $ability /* @var Ability $ability */) {
-			$class           = getClass($ability->getObject());
+			$talent       = $ability->Talent();
+			$class        = getClass($ability->getObject());
+			$modification = $modifications[$talent];
+			if ($modification instanceof Modification) {
+				$ability = $modification->getModified($ability);
+			}
 			$talents[$class] = $ability->Level();
 		}
 		return $talents;
