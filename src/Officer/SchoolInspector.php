@@ -2,8 +2,6 @@
 declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya\Officer;
 
-use JetBrains\PhpStorm\Pure;
-
 use function Lemuria\getClass;
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Model\Fantasya\Ability;
@@ -48,7 +46,7 @@ class SchoolInspector extends AbstractOfficer
 		}
 	}
 
-	#[Pure] protected function getTotalExperience(Party $party): int {
+	protected function getTotalExperience(Party $party): int {
 		$totalExperience = 0;
 		foreach ($party->People() as $unit /* @var Unit $unit */) {
 			foreach ($unit->Knowledge() as $ability) {

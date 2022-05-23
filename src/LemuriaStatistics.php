@@ -25,7 +25,7 @@ class LemuriaStatistics implements Statistics
 	protected final const OFFICERS = [CensusWorker::class, Economist::class, Ranger::class, SchoolInspector::class];
 
 	/**
-	 * @var array(string=>array)
+	 * @var array<string, Officer[]>
 	 */
 	protected array $officers = [];
 
@@ -41,7 +41,7 @@ class LemuriaStatistics implements Statistics
 
 	public function __destruct() {
 		foreach ($this->officers as $officers) {
-			foreach ($officers as $officer /* @var Officer $officer */) {
+			foreach ($officers as $officer) {
 				$officer->close();
 			}
 		}
@@ -98,7 +98,7 @@ class LemuriaStatistics implements Statistics
 	public function enqueue(Metrics $message): Statistics {
 		$subject = $message->Subject();
 		if (isset($this->officers[$subject])) {
-			foreach ($this->officers[$subject] as $officer /* @var Officer $officer */) {
+			foreach ($this->officers[$subject] as $officer) {
 				$officer->process($message);
 			}
 		}
