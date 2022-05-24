@@ -7,9 +7,11 @@ use Lemuria\Lemuria;
 use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Resources;
+use Lemuria\Model\Fantasya\Statistics\Data\Prognoses;
 use Lemuria\Model\Fantasya\Statistics\Data\Singletons;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Statistics\Data\Number;
+use Lemuria\Statistics\Data\Prognosis;
 use Lemuria\Statistics\Fantasya\PartyEntityRecord;
 use Lemuria\Statistics\Metrics;
 use Lemuria\Statistics\Officer;
@@ -117,6 +119,32 @@ abstract class AbstractOfficer implements Officer
 		}
 		foreach ($data as $class => $number) {
 			$newData[$class] = new Number(0, -$number->value);
+		}
+		if (count($newData) > 0) {
+			$statistics->store($archive->setData($newData));
+		}
+	}
+
+	protected function storePrognoses(Metrics $message, array $singletons): void {
+		$statistics = Lemuria::Statistics();
+		$archive    = $statistics->request(Record::from($message));
+		$data       = $archive->Data();
+		if (!($data instanceof Prognoses)) {
+			$data = new Prognoses();
+		}
+		$newData = new Prognoses();
+		foreach ($singletons as $class => $values) {
+			$amount = $values[0];
+			$eta    = $values[1];
+			if (isset($data[$class])) {
+				$newData[$class] = new Prognosis($amount, $amount - $data[$class]->value, $eta);
+				unset($data[$class]);
+			} else {
+				$newData[$class] = new Prognosis($amount, $amount, $eta);
+			}
+		}
+		foreach ($data as $class => $prognosis) {
+			$newData[$class] = new Prognosis(0, -$prognosis->value);
 		}
 		if (count($newData) > 0) {
 			$statistics->store($archive->setData($newData));

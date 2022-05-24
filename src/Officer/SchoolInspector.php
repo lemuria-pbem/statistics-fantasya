@@ -3,6 +3,7 @@ declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya\Officer;
 
 use function Lemuria\getClass;
+use Lemuria\Engine\Fantasya\Command\Learn;
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Factory\BuilderTrait;
@@ -34,7 +35,7 @@ class SchoolInspector extends AbstractOfficer
 			case Subject::Experts->name :
 				$party   = $this->party($message);
 				$experts = $this->calculateExperts($party);
-				$this->storeSingletons($message, $experts);
+				$this->storePrognoses($message, $experts);
 				break;
 			case Subject::Talents->name :
 				$unit    = $this->unit($message);
@@ -60,18 +61,27 @@ class SchoolInspector extends AbstractOfficer
 		$experts = [];
 		foreach ($party->People() as $unit /* @var Unit $unit */) {
 			$modifications = $unit->Race()->Modifications();
-			foreach ($unit->Knowledge() as $ability /* @var Ability $ability */) {
-				$talent       = $ability->Talent();
-				$class        = getClass($ability->getObject());
+			foreach ($unit->Knowledge() as $knowledge /* @var Ability $knowledge */) {
+				$talent       = $knowledge->Talent();
+				$ability      = new Ability($talent, $knowledge->Experience());
+				$class        = getClass($talent);
 				$modification = $modifications[$talent];
 				if ($modification instanceof Modification) {
 					$ability = $modification->getModified($ability);
 				}
-				$level = $ability->Level();
+				$level      = $ability->Level();
+				$difference = Ability::getExperience($knowledge->Level() + 1) - $knowledge->Experience();
+				$rounds     = (int)ceil($difference / Learn::PROGRESS);
 				if (isset($experts[$class])) {
-					$experts[$class] = max($experts[$class], $level);
+					$lastLevel = $experts[$class][0];
+					if ($level > $lastLevel) {
+						$experts[$class][0] = $level;
+						$experts[$class][1] = $rounds;
+					} elseif ($level === $lastLevel && $experts[$class][1] > $rounds) {
+						$experts[$class][1] = $rounds;
+					}
 				} else {
-					$experts[$class] = $level;
+					$experts[$class] = [$level, $rounds];
 				}
 			}
 		}

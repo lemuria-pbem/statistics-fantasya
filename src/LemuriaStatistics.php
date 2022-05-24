@@ -4,6 +4,7 @@ namespace Lemuria\Statistics\Fantasya;
 
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Lemuria;
+use Lemuria\Model\Fantasya\Statistics\Data\Prognoses;
 use Lemuria\Model\Fantasya\Statistics\Data\Singletons;
 use Lemuria\Model\Fantasya\Statistics\Data\Market;
 use Lemuria\Statistics;
@@ -112,11 +113,11 @@ class LemuriaStatistics implements Statistics
 
 	protected function createData(Record $record): Data {
 		return match ($record->Subject()) {
-			Subject::Animals->name,
-			Subject::MaterialPool->name, Subject::RegionPool->name,
-			Subject::Experts->name, Subject::Talents->name          => new Singletons(),
-			Subject::Market->name                                   => new Market(),
-			default                                                 => new Number()
+			Subject::Animals->name, Subject::MaterialPool->name,
+			Subject::RegionPool->name, Subject::Talents->name    => new Singletons(),
+			Subject::Experts->name                               => new Prognoses(),
+			Subject::Market->name                                => new Market(),
+			default                                              => new Number()
 		};
 	}
 }
