@@ -7,9 +7,11 @@ use Lemuria\Engine\Fantasya\Command\Learn;
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Model\Fantasya\Ability;
 use Lemuria\Model\Fantasya\Factory\BuilderTrait;
+use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Knowledge;
 use Lemuria\Model\Fantasya\Modification;
 use Lemuria\Model\Fantasya\Party;
+use Lemuria\Model\Fantasya\People;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Statistics\Fantasya\Exception\UnsupportedSubjectException;
 use Lemuria\Statistics\Metrics;
@@ -22,6 +24,7 @@ class SchoolInspector extends AbstractOfficer
 		parent::__construct();
 		$this->subjects[] = Subject::Education->name;
 		$this->subjects[] = Subject::Experts->name;
+		$this->subjects[] = Subject::Qualification->name;
 		$this->subjects[] = Subject::Talents->name;
 	}
 
@@ -36,6 +39,12 @@ class SchoolInspector extends AbstractOfficer
 				$party   = $this->party($message);
 				$experts = $this->calculateExperts($party);
 				$this->storePrognoses($message, $experts);
+				break;
+			case Subject::Qualification->name :
+				$unit          = $this->unit($message);
+				$intelligence  = new Intelligence($unit->Region());
+				$qualification = $this->calculateQualification($intelligence->getUnits($unit->Party()));
+				$this->storeQualification($message, $qualification);
 				break;
 			case Subject::Talents->name :
 				$unit    = $this->unit($message);
@@ -86,6 +95,55 @@ class SchoolInspector extends AbstractOfficer
 			}
 		}
 		return $experts;
+	}
+
+	protected function calculateQualification(People $people): array {
+		$qualification = [];
+		foreach ($people as $unit /* @var Unit $unit */) {
+			$modifications = $unit->Race()->Modifications();
+			foreach ($unit->Knowledge() as $knowledge /* @var Ability $knowledge */) {
+				$talent = $knowledge->Talent();
+				$class  = getClass($talent);
+				if (!isset($qualification[$class])) {
+					$qualification[$class] = [];
+				}
+
+				$ability      = new Ability($talent, $knowledge->Experience());
+				$modification = $modifications[$talent];
+				if ($modification instanceof Modification) {
+					$ability = $modification->getModified($ability);
+				}
+				$level      = $ability->Level();
+				$difference = Ability::getExperience($knowledge->Level() + 1) - $knowledge->Experience();
+				$rounds     = (int)ceil($difference / Learn::PROGRESS);
+
+				if (!isset($qualification[$class][$level])) {
+					$qualification[$class][$level] = [$unit->Size(), $rounds];
+				} else {
+					$qualification[$class][$level][0] += $unit->Size();
+					if ($rounds < $qualification[$class][$level][1]) {
+						$qualification[$class][$level][1] = $rounds;
+					}
+				}
+			}
+		}
+
+		ksort($qualification);
+		foreach (array_keys($qualification) as $class) {
+			krsort($qualification[$class]);
+			$n = count($qualification[$class]);
+			if ($n > 3) {
+				$levels = array_keys($qualification[$class]);
+				$rest   = $levels[2];
+				for ($i = 3; $i < $n; $i++) {
+					$level                            = $levels[$i];
+					$qualification[$class][$rest][0] += $qualification[$class][$level][0];
+					$qualification[$class][$rest][1]  = min($qualification[$class][$rest][1], $qualification[$class][$level][1]);
+					unset($qualification[$class][$level]);
+				}
+			}
+		}
+		return $qualification;
 	}
 
 	protected function getTalents(Knowledge $knowledge, Knowledge $modifications): array {

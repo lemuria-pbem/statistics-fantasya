@@ -5,6 +5,7 @@ namespace Lemuria\Statistics\Fantasya;
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Lemuria;
 use Lemuria\Model\Fantasya\Statistics\Data\Prognoses;
+use Lemuria\Model\Fantasya\Statistics\Data\Qualification;
 use Lemuria\Model\Fantasya\Statistics\Data\Singletons;
 use Lemuria\Model\Fantasya\Statistics\Data\Market;
 use Lemuria\Statistics;
@@ -117,6 +118,7 @@ class LemuriaStatistics implements Statistics
 			Subject::RegionPool->name, Subject::Talents->name    => new Singletons(),
 			Subject::Experts->name                               => new Prognoses(),
 			Subject::Market->name                                => new Market(),
+			Subject::Qualification->name                         => new Qualification(),
 			default                                              => new Number()
 		};
 	}

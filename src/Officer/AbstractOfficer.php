@@ -8,6 +8,7 @@ use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\Region;
 use Lemuria\Model\Fantasya\Resources;
 use Lemuria\Model\Fantasya\Statistics\Data\Prognoses;
+use Lemuria\Model\Fantasya\Statistics\Data\Qualification;
 use Lemuria\Model\Fantasya\Statistics\Data\Singletons;
 use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Statistics\Data\Number;
@@ -145,6 +146,31 @@ abstract class AbstractOfficer implements Officer
 		}
 		foreach ($data as $class => $prognosis) {
 			$newData[$class] = new Prognosis(0, -$prognosis->value);
+		}
+		if (count($newData) > 0) {
+			$statistics->store($archive->setData($newData));
+		}
+	}
+
+	protected function storeQualification(Metrics $message, array $qualification): void {
+		$statistics = Lemuria::Statistics();
+		$archive    = $statistics->request(PartyEntityRecord::from($message));
+		$data       = $archive->Data();
+		if (!($data instanceof Qualification)) {
+			$data = new Qualification();
+		}
+		$newData = new Qualification();
+		foreach ($qualification as $class => $levelData) {
+			$prognoses = [];
+			foreach ($levelData as $level => $values) {
+				$amount = $values[0];
+				if (isset($data[$class][$level])) {
+					$prognoses[$level] = new Prognosis($amount, $amount - $data[$class][$level]->value, $values[1]);
+				} else {
+					$prognoses[$level] = new Prognosis($amount, $amount, $values[1]);
+				}
+			}
+			$newData[$class] = $prognoses;
 		}
 		if (count($newData) > 0) {
 			$statistics->store($archive->setData($newData));
