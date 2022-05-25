@@ -4,6 +4,8 @@ namespace Lemuria\Statistics\Fantasya;
 
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Lemuria;
+use Lemuria\Model\Fantasya\Statistics\Data\Prognoses;
+use Lemuria\Model\Fantasya\Statistics\Data\Qualification;
 use Lemuria\Model\Fantasya\Statistics\Data\Singletons;
 use Lemuria\Model\Fantasya\Statistics\Data\Market;
 use Lemuria\Statistics;
@@ -25,7 +27,7 @@ class LemuriaStatistics implements Statistics
 	protected final const OFFICERS = [CensusWorker::class, Economist::class, Ranger::class, SchoolInspector::class];
 
 	/**
-	 * @var array(string=>array)
+	 * @var array<string, Officer[]>
 	 */
 	protected array $officers = [];
 
@@ -41,7 +43,7 @@ class LemuriaStatistics implements Statistics
 
 	public function __destruct() {
 		foreach ($this->officers as $officers) {
-			foreach ($officers as $officer /* @var Officer $officer */) {
+			foreach ($officers as $officer) {
 				$officer->close();
 			}
 		}
@@ -98,7 +100,7 @@ class LemuriaStatistics implements Statistics
 	public function enqueue(Metrics $message): Statistics {
 		$subject = $message->Subject();
 		if (isset($this->officers[$subject])) {
-			foreach ($this->officers[$subject] as $officer /* @var Officer $officer */) {
+			foreach ($this->officers[$subject] as $officer) {
 				$officer->process($message);
 			}
 		}
@@ -112,11 +114,12 @@ class LemuriaStatistics implements Statistics
 
 	protected function createData(Record $record): Data {
 		return match ($record->Subject()) {
-			Subject::Animals->name,
-			Subject::MaterialPool->name, Subject::RegionPool->name,
-			Subject::Experts->name, Subject::Talents->name          => new Singletons(),
-			Subject::Market->name                                   => new Market(),
-			default                                                 => new Number()
+			Subject::Animals->name, Subject::MaterialPool->name,
+			Subject::RegionPool->name, Subject::Talents->name    => new Singletons(),
+			Subject::Experts->name                               => new Prognoses(),
+			Subject::Market->name                                => new Market(),
+			Subject::Qualification->name                         => new Qualification(),
+			default                                              => new Number()
 		};
 	}
 }

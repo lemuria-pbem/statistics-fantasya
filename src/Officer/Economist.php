@@ -2,8 +2,6 @@
 declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya\Officer;
 
-use JetBrains\PhpStorm\Pure;
-
 use function Lemuria\getClass;
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Lemuria;
@@ -113,7 +111,7 @@ class Economist extends AbstractOfficer
 		return $newMarket;
 	}
 
-	#[Pure] protected function getMaterialPool(Party $party): array {
+	protected function getMaterialPool(Party $party): array {
 		$pool = [];
 		foreach ($party->People() as $unit /* @var Unit $unit */) {
 			foreach ($unit->Inventory() as $item /* @var Quantity $item */) {
