@@ -119,7 +119,9 @@ abstract class AbstractOfficer implements Officer
 			}
 		}
 		foreach ($data as $class => $number) {
-			$newData[$class] = new Number(0, -$number->value);
+			if ($number->value > 0) {
+				$newData[$class] = new Number(0, -$number->value);
+			}
 		}
 		if (count($newData) > 0) {
 			$statistics->store($archive->setData($newData));

@@ -29,15 +29,18 @@ class Economist extends AbstractOfficer
 		parent::__construct();
 		$this->subjects[] = Subject::Charity->name;
 		$this->subjects[] = Subject::Income->name;
+		$this->subjects[] = Subject::Joblessness->name;
 		$this->subjects[] = Subject::LearningCosts->name;
 		$this->subjects[] = Subject::Maintenance->name;
 		$this->subjects[] = Subject::Market->name;
 		$this->subjects[] = Subject::MaterialPool->name;
+		$this->subjects[] = Subject::Prosperity->name;
 		$this->subjects[] = Subject::Purchase->name;
 		$this->subjects[] = Subject::Recruiting->name;
 		$this->subjects[] = Subject::RegionPool->name;
 		$this->subjects[] = Subject::Support->name;
 		$this->subjects[] = Subject::Workers->name;
+		$this->subjects[] = Subject::Workplaces->name;
 	}
 
 	public function process(Metrics $message): void {
@@ -56,7 +59,10 @@ class Economist extends AbstractOfficer
 				$this->storeCachedNumber($message, $amount);
 				break;
 			case Subject::Income->name :
+			case Subject::Joblessness->name :
+			case Subject::Prosperity->name :
 			case Subject::Workers->name :
+			case Subject::Workplaces->name :
 				$data   = $message->Data();
 				$amount = $data instanceof Number ? $data->value : 0;
 				$this->storeNumber($message, $amount);
