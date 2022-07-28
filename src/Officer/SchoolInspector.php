@@ -71,16 +71,9 @@ class SchoolInspector extends AbstractOfficer
 		foreach ($party->People() as $unit /* @var Unit $unit */) {
 			$modifications = $unit->Race()->Modifications();
 			foreach ($unit->Knowledge() as $knowledge /* @var Ability $knowledge */) {
-				$talent       = $knowledge->Talent();
-				$ability      = new Ability($talent, $knowledge->Experience());
-				$class        = getClass($talent);
-				$modification = $modifications[$talent];
-				if ($modification instanceof Modification) {
-					$ability = $modification->getModified($ability);
-				}
-				$level      = $ability->Level();
-				$difference = Ability::getExperience($knowledge->Level() + 1) - $knowledge->Experience();
-				$rounds     = (int)ceil($difference / Learn::PROGRESS);
+				$level  = $this->calculateLevel($knowledge, $modifications);
+				$rounds = $this->calculateRounds($knowledge);
+				$class  = getClass($knowledge->Talent());
 				if (isset($experts[$class])) {
 					$lastLevel = $experts[$class][0];
 					if ($level > $lastLevel) {
@@ -102,21 +95,12 @@ class SchoolInspector extends AbstractOfficer
 		foreach ($people as $unit /* @var Unit $unit */) {
 			$modifications = $unit->Race()->Modifications();
 			foreach ($unit->Knowledge() as $knowledge /* @var Ability $knowledge */) {
-				$talent = $knowledge->Talent();
-				$class  = getClass($talent);
+				$level  = $this->calculateLevel($knowledge, $modifications);
+				$rounds = $this->calculateRounds($knowledge);
+				$class  = getClass($knowledge->Talent());
 				if (!isset($qualification[$class])) {
 					$qualification[$class] = [];
 				}
-
-				$ability      = new Ability($talent, $knowledge->Experience());
-				$modification = $modifications[$talent];
-				if ($modification instanceof Modification) {
-					$ability = $modification->getModified($ability);
-				}
-				$level      = $ability->Level();
-				$difference = Ability::getExperience($knowledge->Level() + 1) - $knowledge->Experience();
-				$rounds     = (int)ceil($difference / Learn::PROGRESS);
-
 				if (!isset($qualification[$class][$level])) {
 					$qualification[$class][$level] = [$unit->Size(), $rounds];
 				} else {
@@ -158,5 +142,20 @@ class SchoolInspector extends AbstractOfficer
 			$talents[$class] = $ability->Level();
 		}
 		return $talents;
+	}
+
+	private function calculateLevel(Ability $knowledge, Knowledge $modifications): int {
+		$talent       = $knowledge->Talent();
+		$ability      = new Ability($talent, $knowledge->Experience());
+		$modification = $modifications[$talent];
+		if ($modification instanceof Modification) {
+			$ability = $modification->getModified($ability);
+		}
+		return $ability->Level();
+	}
+
+	private function calculateRounds(Ability $knowledge): int {
+		$difference = Ability::getExperience($knowledge->Level() + 1) - $knowledge->Experience();
+		return (int)ceil($difference / Learn::PROGRESS);
 	}
 }
