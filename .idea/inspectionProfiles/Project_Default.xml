@@ -8,6 +8,9 @@
       <scope name="All Changed Files" level="WARNING" enabled="true" />
     </inspection_tool>
     <inspection_tool class="PhpDocMissingThrowsInspection" enabled="false" level="WEAK WARNING" enabled_by_default="false" />
+    <inspection_tool class="PhpIllegalArrayKeyTypeInspection" enabled="true" level="WEAK WARNING" enabled_by_default="true" editorAttributes="INFO_ATTRIBUTES">
+      <option name="PHP8_SEVERITY" value="WEAK WARNING" />
+    </inspection_tool>
     <inspection_tool class="PhpUnhandledExceptionInspection" enabled="true" level="WARNING" enabled_by_default="true" />
     <inspection_tool class="PhpUnused" enabled="true" level="WEAK WARNING" enabled_by_default="false">
       <scope name="All Changed Files" level="WEAK WARNING" enabled="true" />
