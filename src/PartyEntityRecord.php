@@ -22,4 +22,15 @@ class PartyEntityRecord extends Record
 		}
 		return parent::Key();
 	}
+
+	public function getLegacyKey(): string {
+		$unit = $this->Entity();
+		if ($unit instanceof Unit) {
+			$party  = $unit->Party();
+			$region = $unit->Region();
+			return $party->Catalog()->getLegacyValue() . '.' . $party->Id()->Id() . '.' .
+				   $region->Catalog()->getLegacyValue() . '.' . $region->Id()->Id() . '.' . $this->Subject();
+		}
+		return parent::Key();
+	}
 }

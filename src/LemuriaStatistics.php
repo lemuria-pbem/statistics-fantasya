@@ -67,7 +67,7 @@ class LemuriaStatistics implements Statistics
 			$data = $this->createData($record);
 			return $record->setData($data->unserialize($this->archive[$key]));
 		}
-		return $record->setData(null);
+		return $this->requestLegacy($record);
 	}
 
 	public function store(Record $record): Statistics {
@@ -121,5 +121,25 @@ class LemuriaStatistics implements Statistics
 			Subject::Qualification->name                         => new Qualification(),
 			default                                              => new Number()
 		};
+	}
+
+	protected function requestLegacy(Record $record): Record {
+		if ($record instanceof PartyEntityRecord) {
+			$key = $record->getLegacyKey();
+		} else {
+			$entity = $record->Entity();
+			if ($entity) {
+				$key = $entity->Catalog()->getLegacyValue() . '.' . $entity->Id()->Id() . '.' . $record->Subject();
+			} else {
+				$key = $record->Key();
+			}
+		}
+
+		if (isset($this->archive[$key])) {
+			$data = $this->createData($record);
+			return $record->setData($data->unserialize($this->archive[$key]));
+		}
+
+		return $record->setData(null);
 	}
 }
