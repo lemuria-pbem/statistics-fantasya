@@ -12,7 +12,6 @@ use Lemuria\Model\Fantasya\Knowledge;
 use Lemuria\Model\Fantasya\Modification;
 use Lemuria\Model\Fantasya\Party;
 use Lemuria\Model\Fantasya\People;
-use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Statistics\Fantasya\Exception\UnsupportedSubjectException;
 use Lemuria\Statistics\Metrics;
 
@@ -58,7 +57,7 @@ class SchoolInspector extends AbstractOfficer
 
 	protected function getTotalExperience(Party $party): int {
 		$totalExperience = 0;
-		foreach ($party->People() as $unit /* @var Unit $unit */) {
+		foreach ($party->People() as $unit) {
 			foreach ($unit->Knowledge() as $ability) {
 				$totalExperience += $ability->Count();
 			}
@@ -68,9 +67,9 @@ class SchoolInspector extends AbstractOfficer
 
 	protected function calculateExperts(Party $party): array {
 		$experts = [];
-		foreach ($party->People() as $unit /* @var Unit $unit */) {
+		foreach ($party->People() as $unit) {
 			$modifications = $unit->Race()->Modifications();
-			foreach ($unit->Knowledge() as $knowledge /* @var Ability $knowledge */) {
+			foreach ($unit->Knowledge() as $knowledge) {
 				$level  = $this->calculateLevel($knowledge, $modifications);
 				$rounds = $this->calculateRounds($knowledge);
 				$class  = getClass($knowledge->Talent());
@@ -92,9 +91,9 @@ class SchoolInspector extends AbstractOfficer
 
 	protected function calculateQualification(People $people): array {
 		$qualification = [];
-		foreach ($people as $unit /* @var Unit $unit */) {
+		foreach ($people as $unit) {
 			$modifications = $unit->Race()->Modifications();
-			foreach ($unit->Knowledge() as $knowledge /* @var Ability $knowledge */) {
+			foreach ($unit->Knowledge() as $knowledge) {
 				$level  = $this->calculateLevel($knowledge, $modifications);
 				$rounds = $this->calculateRounds($knowledge);
 				$class  = getClass($knowledge->Talent());
@@ -132,7 +131,7 @@ class SchoolInspector extends AbstractOfficer
 
 	protected function getTalents(Knowledge $knowledge, Knowledge $modifications): array {
 		$talents = [];
-		foreach ($knowledge as $ability /* @var Ability $ability */) {
+		foreach ($knowledge as $ability) {
 			$talent       = $ability->Talent();
 			$class        = getClass($ability->getObject());
 			$modification = $modifications[$talent];

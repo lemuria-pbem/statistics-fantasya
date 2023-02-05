@@ -27,7 +27,7 @@ class LemuriaStatistics implements Statistics
 	protected final const OFFICERS = [CensusWorker::class, Economist::class, Ranger::class, SchoolInspector::class];
 
 	/**
-	 * @var array<string, Officer[]>
+	 * @var array<string, array<Officer>>
 	 */
 	protected array $officers = [];
 

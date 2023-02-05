@@ -9,9 +9,7 @@ use Lemuria\Model\Fantasya\Factory\BuilderTrait;
 use Lemuria\Model\Fantasya\Intelligence;
 use Lemuria\Model\Fantasya\Luxuries;
 use Lemuria\Model\Fantasya\Party;
-use Lemuria\Model\Fantasya\Quantity;
 use Lemuria\Model\Fantasya\Statistics\Data\Market;
-use Lemuria\Model\Fantasya\Unit;
 use Lemuria\Statistics\Data\Number;
 use Lemuria\Statistics\Fantasya\Exception\UnsupportedSubjectException;
 use Lemuria\Statistics\Metrics;
@@ -119,8 +117,8 @@ class Economist extends AbstractOfficer
 
 	protected function getMaterialPool(Party $party): array {
 		$pool = [];
-		foreach ($party->People() as $unit /* @var Unit $unit */) {
-			foreach ($unit->Inventory() as $item /* @var Quantity $item */) {
+		foreach ($party->People() as $unit) {
+			foreach ($unit->Inventory() as $item) {
 				$class = getClass($item->Commodity());
 				if (isset($pool[$class])) {
 					$pool[$class] += $item->Count();
