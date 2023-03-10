@@ -13,6 +13,7 @@ use Lemuria\Statistics\Data;
 use Lemuria\Statistics\Data\Number;
 use Lemuria\Statistics\Fantasya\Exception\AlreadyRegisteredException;
 use Lemuria\Statistics\Fantasya\Officer\CensusWorker;
+use Lemuria\Statistics\Fantasya\Officer\Colonialist;
 use Lemuria\Statistics\Fantasya\Officer\Economist;
 use Lemuria\Statistics\Fantasya\Officer\Ranger;
 use Lemuria\Statistics\Fantasya\Officer\SchoolInspector;
@@ -24,7 +25,9 @@ use Lemuria\Version\VersionTag;
 
 class LemuriaStatistics implements Statistics
 {
-	protected final const OFFICERS = [CensusWorker::class, Economist::class, Ranger::class, SchoolInspector::class];
+	protected final const OFFICERS = [
+		CensusWorker::class, Colonialist::class, Economist::class, Ranger::class, SchoolInspector::class
+	];
 
 	/**
 	 * @var array<string, array<Officer>>
