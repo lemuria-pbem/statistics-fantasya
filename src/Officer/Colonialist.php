@@ -24,13 +24,13 @@ class Colonialist extends AbstractOfficer
 				$unit         = $this->unit($message);
 				$intelligence = new Intelligence($unit->Region());
 				$units        = $intelligence->getUnits($unit->Party())->count();
-				$this->storeNumber($message, $units);
+				$this->storeNumberPartyEntity($message, $units);
 				break;
 			case Subject::PeopleForce->name :
 				$unit         = $this->unit($message);
 				$intelligence = new Intelligence($unit->Region());
 				$persons      = $intelligence->getUnits($unit->Party())->Size();
-				$this->storeNumber($message, $persons);
+				$this->storeNumberPartyEntity($message, $persons);
 				break;
 			default :
 				throw new UnsupportedSubjectException($this, $message);
