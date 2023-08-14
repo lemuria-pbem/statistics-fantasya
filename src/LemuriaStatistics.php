@@ -73,12 +73,12 @@ class LemuriaStatistics implements Statistics
 		return $this->requestLegacy($record);
 	}
 
-	public function store(Record $record): Statistics {
+	public function store(Record $record): static {
 		$this->collection[$record->Key()] = $record->Data()->serialize();
 		return $this;
 	}
 
-	public function register(Officer $officer): Statistics {
+	public function register(Officer $officer): static {
 		$id = $officer->Id();
 		foreach ($officer->Subjects() as $subject) {
 			if (!isset($this->officers[$subject])) {
@@ -92,7 +92,7 @@ class LemuriaStatistics implements Statistics
 		return $this;
 	}
 
-	public function resign(Officer $officer): Statistics {
+	public function resign(Officer $officer): static {
 		$id = $officer->Id();
 		foreach ($officer->Subjects() as $subject) {
 			unset ($this->officers[$subject][$id]);
@@ -100,7 +100,7 @@ class LemuriaStatistics implements Statistics
 		return $this;
 	}
 
-	public function enqueue(Metrics $message): Statistics {
+	public function enqueue(Metrics $message): static {
 		$subject = $message->Subject();
 		if (isset($this->officers[$subject])) {
 			foreach ($this->officers[$subject] as $officer) {

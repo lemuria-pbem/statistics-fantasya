@@ -8,7 +8,7 @@ use Lemuria\Statistics\Record;
 
 class PartyEntityRecord extends Record
 {
-	public static function from(Metrics $metrics): Record {
+	public static function from(Metrics $metrics): static {
 		return new self($metrics->Subject(), $metrics->Entity());
 	}
 
