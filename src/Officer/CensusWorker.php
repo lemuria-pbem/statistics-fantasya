@@ -3,6 +3,9 @@ declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya\Officer;
 
 use Lemuria\Engine\Fantasya\Availability;
+use Lemuria\Engine\Fantasya\Context;
+use Lemuria\Engine\Fantasya\Factory\RealmTrait;
+use Lemuria\Engine\Fantasya\State;
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Model\Fantasya\Commodity\Peasant;
 use Lemuria\Model\Fantasya\Commodity\Silver;
@@ -14,6 +17,9 @@ use Lemuria\Statistics\Metrics;
 class CensusWorker extends AbstractOfficer
 {
 	use BuilderTrait;
+	use RealmTrait;
+
+	private ?Context $context = null;
 
 	/**
 	 * @noinspection DuplicatedCode
@@ -21,6 +27,7 @@ class CensusWorker extends AbstractOfficer
 	public function __construct() {
 		parent::__construct();
 		$this->subjects[] = Subject::Births->name;
+		$this->subjects[] = Subject::Infrastructure->name;
 		$this->subjects[] = Subject::Migration->name;
 		$this->subjects[] = Subject::People->name;
 		$this->subjects[] = Subject::Population->name;
@@ -34,6 +41,10 @@ class CensusWorker extends AbstractOfficer
 			case Subject::Births->name :
 				$data   = $message->Data();
 				$amount = $data instanceof Number ? $data->value : 0;
+				break;
+			case Subject::Infrastructure->name :
+				$this->initContext();
+				$amount = $this->calculateInfrastructure($this->region($message));
 				break;
 			case Subject::Migration->name :
 				$data   = $message->Data();
@@ -62,5 +73,11 @@ class CensusWorker extends AbstractOfficer
 				throw new UnsupportedSubjectException($this, $message);
 		}
 		$this->storeNumber($message, $amount);
+	}
+
+	private function initContext(): void {
+		if (!$this->context) {
+			$this->context = new Context(State::getInstance());
+		}
 	}
 }
