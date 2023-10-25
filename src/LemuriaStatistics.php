@@ -15,6 +15,7 @@ use Lemuria\Statistics\Fantasya\Exception\AlreadyRegisteredException;
 use Lemuria\Statistics\Fantasya\Officer\CensusWorker;
 use Lemuria\Statistics\Fantasya\Officer\Colonialist;
 use Lemuria\Statistics\Fantasya\Officer\Economist;
+use Lemuria\Statistics\Fantasya\Officer\Ethnologist;
 use Lemuria\Statistics\Fantasya\Officer\Ranger;
 use Lemuria\Statistics\Fantasya\Officer\SchoolInspector;
 use Lemuria\Statistics\Metrics;
@@ -26,7 +27,8 @@ use Lemuria\Version\VersionTag;
 class LemuriaStatistics implements Statistics
 {
 	protected final const OFFICERS = [
-		CensusWorker::class, Colonialist::class, Economist::class, Ranger::class, SchoolInspector::class
+		CensusWorker::class, Colonialist::class, Economist::class, Ethnologist::class, Ranger::class,
+		SchoolInspector::class
 	];
 
 	/**
@@ -118,7 +120,8 @@ class LemuriaStatistics implements Statistics
 	protected function createData(Record $record): Data {
 		return match ($record->Subject()) {
 			Subject::Animals->name, Subject::MaterialPool->name,
-			Subject::RegionPool->name, Subject::Talents->name    => new Singletons(),
+			Subject::RegionPool->name, Subject::Talents->name,
+			Subject::RaceUnits->name, Subject::RacePeople->name  => new Singletons(),
 			Subject::Experts->name                               => new Prognoses(),
 			Subject::Market->name                                => new Market(),
 			Subject::Qualification->name                         => new Qualification(),
