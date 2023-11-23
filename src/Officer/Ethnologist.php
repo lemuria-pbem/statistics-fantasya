@@ -3,7 +3,7 @@ declare(strict_types = 1);
 namespace Lemuria\Statistics\Fantasya\Officer;
 
 use function Lemuria\getClass;
-use Lemuria\Engine\Fantasya\Event\Game\Spawn;
+use Lemuria\Engine\Fantasya\State;
 use Lemuria\Engine\Fantasya\Statistics\Subject;
 use Lemuria\Model\Fantasya\Commodity\Griffin;
 use Lemuria\Model\Fantasya\Factory\BuilderTrait;
@@ -26,9 +26,6 @@ class Ethnologist extends AbstractOfficer
 	 */
 	protected array $races = [];
 
-	/**
-	 * @noinspection DuplicatedCode
-	 */
 	public function __construct() {
 		parent::__construct();
 		$this->subjects[] = Subject::RaceUnits->name;
@@ -64,8 +61,9 @@ class Ethnologist extends AbstractOfficer
 	}
 
 	protected function countGriffins(Party $party): void {
-		$type = $party->Type();
-		if ($type === Type::Monster && $party->Id()->Id() === Spawn::getPartyId($type)->Id()) {
+		$finder = State::getInstance()->getTurnOptions()->Finder()->Party();
+		$type   = $party->Type();
+		if ($type === Type::Monster && $party->Id()->Id() === $finder->findByType($type)->Id()->Id()) {
 			$units   = 0;
 			$people  = 0;
 			$griffin = self::createRace(Griffin::class);
